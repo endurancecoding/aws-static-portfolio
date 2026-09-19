@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+  Infrastructure for my AWS static portfolio website.
+
+Resources:
+  WebsiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: portfolio-s3-oac-cfn
+        Description: Access control for the portfolio S3 bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        HttpVersion: http2
+
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt WebsiteBucket.RegionalDomainName
+            S3OriginConfig: {}
+            OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+
+          AllowedMethods:
+            - GET
+            - HEAD
+
+          CachedMethods:
+            - GET
+            - HEAD
+
+          ForwardedValues:
+            QueryString: false
+
+        PriceClass: PriceClass_100
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteBucket
+
+      PolicyDocument:
+        Version: '2012-10-17'
+
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
+
+            Principal:
+              Service: cloudfront.amazonaws.com
+
+            Action:
+              - s3:GetObject
+
+            Resource:
+              - !Sub '${WebsiteBucket.Arn}/*'
+
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
+
+Outputs:
+  WebsiteBucketName:
+    Description: S3 bucket hosting the portfolio website
+    Value: !Ref WebsiteBucket
+
+  CloudFrontDistributionId:
+    Description: CloudFront distribution ID
+    Value: !Ref CloudFrontDistribution
+
+  CloudFrontDomainName:
+    Description: CloudFront domain name
+    Value: !GetAtt CloudFrontDistribution.DomainName

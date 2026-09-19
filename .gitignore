@@ -1,0 +1,17 @@
+# AWS credentials
+.aws/
+
+# Environment files
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+
+# Temporary files
+*.tmp
+*.log
