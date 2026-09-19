@@ -128,7 +128,13 @@ Resources:
                   - cloudfront:CreateInvalidation
                 Resource:
                   - !Sub 'arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}'
-                  
+ 
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                Resource:
+                  - !Sub 'arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*' 
+                                   
 Outputs:
   WebsiteBucketName:
     Description: S3 bucket hosting the portfolio website
