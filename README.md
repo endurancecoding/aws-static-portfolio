@@ -2,6 +2,10 @@
 
 A static personal portfolio website hosted on AWS using Amazon S3 and Amazon CloudFront, with automated CI/CD deployment through GitHub Actions.
 
+## Architectural Diagram
+
+![image alt](https://github.com/endurancecoding/aws-static-portfolio/blob/86aff0eb919a95f25a0d50c4848cfcbde38d8ccd/architecture/b221ff52-c2b5-483b-83f2-7791ab71111c.png)
+
 ## Architecture
 
 The application follows this flow:
